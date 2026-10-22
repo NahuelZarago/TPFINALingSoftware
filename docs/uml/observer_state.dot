@@ -1,0 +1,30 @@
+// Diagrama UML de estado: ciclo de vida de una suscripción (patrón Observer)
+// en el servidor. Render: dot -Tpng observer_state.dot -o observer_state.png
+digraph observer_state {
+  graph [rankdir=LR, fontname="Helvetica", fontsize=13, labelloc=t, nodesep=0.5, ranksep=0.7,
+         label="UML de estado – gestión de una suscripción en el servidor (patrón Observer)\n "];
+  node  [fontname="Helvetica", fontsize=11, shape=box, style="rounded,filled", fillcolor="#E0F2FE", color="#334155", penwidth=1.2];
+  edge  [fontname="Helvetica", fontsize=10, color="#334155"];
+
+  ini [shape=circle, style=filled, fillcolor="#111827", label="", width=0.25, fixedsize=true];
+  fin [shape=doublecircle, style=filled, fillcolor="#111827", label="", width=0.22, fixedsize=true];
+
+  Conectado  [label="Conectado\n―――――――\nsocket TCP aceptado,\nsin requerimiento"];
+  Validando  [label="Validando\n―――――――\nUUID y ACTION=subscribe;\nauditoría en CorporateLog"];
+  Rechazado  [label="Rechazado\n―――――――\nse responde Error", fillcolor="#FEE2E2"];
+  Suscripto  [label="Suscripto\n―――――――\nSocketObserver registrado\nen SubscriptionManager;\nsocket abierto", fillcolor="#DCFCE7"];
+  Notificando [label="Notificando\n―――――――\nnotify(registro):\nsendall por el socket", fillcolor="#FEF3C7"];
+  Baja       [label="Baja\n―――――――\ndetach + close del socket", fillcolor="#F1F5F9"];
+
+  ini -> Conectado [label="cliente abre\nla conexión"];
+  Conectado -> Validando [label="llega JSON\nsubscribe"];
+  Conectado -> Baja [label="no llega nada\n(timeout) / cierra"];
+  Validando -> Rechazado [label="inválido o\nfalla auditoría"];
+  Validando -> Suscripto [label="OK / enviar acuse\nattach(observer)"];
+  Rechazado -> Baja [label="cerrar conexión"];
+  Suscripto -> Notificando [label="set exitoso de\notro cliente"];
+  Notificando -> Suscripto [label="sendall OK"];
+  Notificando -> Baja [label="sendall falla (OSError)\n/ detach + close"];
+  Suscripto -> Baja [label="stop() del servidor:\nclose_all()"];
+  Baja -> fin;
+}

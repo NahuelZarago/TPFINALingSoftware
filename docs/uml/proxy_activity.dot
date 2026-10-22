@@ -1,0 +1,69 @@
+// Diagrama UML de actividad: gestión de get/set/list (y subscribe) en el servidor
+// (patrón Proxy). Render: dot -Tpng proxy_activity.dot -o proxy_activity.png
+digraph proxy_activity {
+  graph [rankdir=TB, fontname="Helvetica", fontsize=13, labelloc=t, nodesep=0.45, ranksep=0.5,
+         label="UML de actividad – gestión de get / set / list / subscribe en el servidor (patrón Proxy)\n "];
+  node  [fontname="Helvetica", fontsize=11, shape=box, style="rounded,filled", fillcolor="#FFFFFF", color="#334155", penwidth=1.2];
+  edge  [fontname="Helvetica", fontsize=10, color="#334155"];
+
+  start [shape=circle, style=filled, fillcolor="#111827", label="", width=0.25, fixedsize=true];
+  fin   [shape=doublecircle, style=filled, fillcolor="#111827", label="", width=0.22, fixedsize=true];
+
+  s_read  [label="ProxyServer: aceptar conexión TCP\ny leer el requerimiento JSON"];
+  d_json  [shape=diamond, style=filled, fillcolor="#FEF3C7", label="¿JSON de objeto\nválido?"];
+  d_min   [shape=diamond, style=filled, fillcolor="#FEF3C7", label="¿UUID y ACTION válidos\n(ID en get/set)?"];
+  s_audit [label="CorporateDataProxy: auditar antes de ejecutar\nCorporateLogDB.record(UUID, sessionid uuid4,\nacción, ID, timestamp, CPUid, platform)", fillcolor="#EDE9FE"];
+  d_audit [shape=diamond, style=filled, fillcolor="#FEF3C7", label="¿Auditoría\ngrabada?"];
+  d_act   [shape=diamond, style=filled, fillcolor="#FEF3C7", label="ACTION"];
+
+  q_get   [label="CorporateDataDB.get(ID)", fillcolor="#DBEAFE"];
+  d_found [shape=diamond, style=filled, fillcolor="#FEF3C7", label="¿ID existe?"];
+  s_rec   [label="Responder el registro\n(tuple CorporateData)"];
+
+  q_list  [label="CorporateDataDB.list()\n(scan paginado)", fillcolor="#DBEAFE"];
+  s_arr   [label="Responder array con\ntodos los registros"];
+
+  q_set   [label="CorporateDataDB.set(ID, campos)\nno informados: se conservan;\nregistro nuevo: en blanco", fillcolor="#DBEAFE"];
+  fork    [shape=box, style=filled, fillcolor="#111827", label="", width=1.6, height=0.06, fixedsize=true];
+  s_setr  [label="Responder el registro\nmodificado al solicitante"];
+  o_notify[label="SubscriptionManager.notify(registro)\na todos los observers suscriptos", fillcolor="#DCFCE7"];
+  join    [shape=box, style=filled, fillcolor="#111827", label="", width=1.6, height=0.06, fixedsize=true];
+
+  o_attach[label="SubscriptionManager.attach(SocketObserver)\nacuse de suscripción", fillcolor="#DCFCE7"];
+
+  s_err   [label="Responder Error", fillcolor="#FEE2E2"];
+  s_close [label="Cerrar la conexión con el cliente"];
+
+  start -> s_read -> d_json;
+  d_json -> d_min [label="sí"];
+  d_json -> s_err [label="no"];
+  d_min -> s_audit [label="sí"];
+  d_min -> s_err [label="no"];
+  s_audit -> d_audit;
+  d_audit -> d_act [label="sí"];
+  d_audit -> s_err [label="no"];
+
+  d_act -> q_get [label="get"];
+  d_act -> q_list [label="list"];
+  d_act -> q_set [label="set"];
+  d_act -> o_attach [label="subscribe"];
+
+  q_get -> d_found;
+  d_found -> s_rec [label="sí"];
+  d_found -> s_err [label="no"];
+  q_list -> s_arr;
+  q_set -> fork;
+  fork -> s_setr;
+  fork -> o_notify;
+  s_setr -> join;
+  o_notify -> join;
+
+  s_rec -> s_close;
+  s_arr -> s_close;
+  join -> s_close;
+  s_err -> s_close;
+  s_close -> fin;
+  o_attach -> fin [label="el socket queda abierto\ny registrado"];
+
+  {rank=same; q_get; q_list; q_set; o_attach}
+}

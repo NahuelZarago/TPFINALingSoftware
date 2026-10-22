@@ -1,0 +1,57 @@
+[project]
+name = "tpfi"
+dynamic = ["version"]
+description = "TPFI IS2 - Proxy/Singleton/Observer sobre AWS DynamoDB"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+dependencies = ["boto3"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["tpfi", "tpfi.db", "tpfi.apps"]
+
+[tool.setuptools.dynamic]
+version = { file = ["VERSION"] }
+
+[tool.black]
+line-length = 88
+target-version = ["py310"]
+extend-exclude = "referencia/"
+
+[tool.ruff]
+line-length = 88
+target-version = "py310"
+extend-exclude = ["referencia"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "D", "UP", "B"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "pep257"
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["D"]
+
+[tool.mypy]
+python_version = "3.10"
+strict = true
+ignore_missing_imports = true
+files = ["tpfi"]
+
+[tool.pyright]
+include = ["tpfi"]
+pythonVersion = "3.10"
+typeCheckingMode = "standard"
+reportMissingImports = false
+reportMissingModuleSource = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--cov=tpfi --cov-report=term-missing --cov-fail-under=85"
+
+[tool.bandit]
+exclude_dirs = ["tests", "venv", ".venv"]
