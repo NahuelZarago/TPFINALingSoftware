@@ -19,7 +19,7 @@ Servidor de aplicaciones que actúa como **proxy** de acceso a las tablas Dynamo
 | UML de actividad (proxy) y de estado (observer) | Hecho (`docs/uml/`) |
 | Tests unitarios + aceptación (cobertura >= 85 %) | Hecho |
 | ruff, black, mypy, pyright, bandit, pdoc, CI en GitHub | Configurados (ver "Calidad") |
-| Esqueleto CookieCutter | Pendiente de generar (estructura equivalente armada a mano) |
+| Esqueleto CookieCutter | Hecho (ver `docs/cookiecutter.md`) |
 
 ## Instalación
 

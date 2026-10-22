@@ -27,3 +27,17 @@ Registro de prompts utilizados (requisito del TPFI). Herramienta: Claude
     Resultado: servidor TCP, `singletonclient`, `observerclient`, interfaz
     `DataService`, descubrimiento de claves, tests de aceptación, diagramas UML
     (Graphviz) y actualización de README y CHANGELOG.
+
+## 13. Instalación en Windows, prueba real en AWS, CI y CookieCutter (2026-10-21/22)
+
+- Reinstalación del entorno en Windows (Python, venv, AWS CLI, `aws configure`).
+- Prueba real contra DynamoDB: set/get/list y registros de auditoría en CorporateLog,
+  verificados con `ver_log.py` (filtra por CPUid).
+- Se corrigió el test de reintentos del observer para Windows: los connect rechazados tardan
+  unos 2 s, así que ahora se leen los reintentos de un archivo en lugar de contarlos por tiempo.
+- Primer push a GitHub (repositorio privado) con `.gitignore` ampliado para credenciales.
+  El CI falló por ruff W292 (falta de salto de línea final); se corrigió con `black .`
+  y quedó en verde.
+- Esqueleto CookieCutter generado con `cookiecutter-pypackage`; se adoptó el andamiaje del
+  repositorio y se descartó el layout `src/` (detalle en `docs/cookiecutter.md`).
+- Prompt usado con la IA: "Se generó el esqueleto, estos son los archivos, ¿cuáles copio?".
